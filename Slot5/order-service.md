@@ -7,7 +7,7 @@
 
 - [ ] Tạo project Spring Boot tại start.spring.io
 - [ ] Cài MySQL bằng Docker Compose (dùng chung container với inventory-service)
-- [ ] Tạo `init.sql` để tạo database `order_service`
+- [ ] Tạo `init.sql` để tạo database `orderservice`
 - [ ] Cấu hình `application.properties`
 - [ ] Viết Flyway migration `V1__init.sql`
 - [ ] Tạo Model `Order`
@@ -410,7 +410,7 @@ mvn test
 ## ✅ Checklist hoàn thành Order Service
 
 - [ ] Cấu trúc thư mục đúng package `com.fudn.orderservice.*`
-- [ ] `docker compose up -d mysql` chạy ổn định, database `order_service` đã tồn tại
+- [ ] `docker compose up -d mysql` chạy ổn định, database `orderservice` đã tồn tại
 - [ ] `application.properties` trỏ đúng datasource, port 8081
 - [ ] Flyway migration `V1__init.sql` chạy thành công (log "Successfully applied")
 - [ ] `Order`, `OrderRepository`, `OrderRequest`, `OrderService`, `OrderController` đã tạo đủ

@@ -59,7 +59,7 @@ CREATE DATABASE IF NOT EXISTS inventory_service;
 ### TODO
 - [ ] Cập nhật `mysql/init.sql` với 2 dòng `CREATE DATABASE`
 - [ ] Nếu cần: reset volume MySQL và chạy lại container
-- [ ] Xác nhận cả 2 database `order_service` và `inventory_service` tồn tại
+- [ ] Xác nhận cả 2 database `orderservice` và `inventory_service` tồn tại
 
 ---
 
