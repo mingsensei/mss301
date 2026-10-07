@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+/** BCrypt password encoder bean for hashing and verification. */
 @Configuration
 public class PasswordConfig {
 
