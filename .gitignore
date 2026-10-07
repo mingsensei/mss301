@@ -6,3 +6,6 @@
 *.iws
 *.iml
 *.ipr
+target/
+volume-data/
+mysql/
