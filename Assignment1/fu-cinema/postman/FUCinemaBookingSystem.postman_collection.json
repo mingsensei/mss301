@@ -1,0 +1,16 @@
+{
+  "info": {
+    "name": "FUCinemaBookingSystem",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {"name": "01-Auth", "item": []},
+    {"name": "02-Customer", "item": []},
+    {"name": "03-Genre-Room", "item": []},
+    {"name": "04-Movie", "item": []},
+    {"name": "05-Showtime", "item": []},
+    {"name": "06-Booking", "item": []},
+    {"name": "07-History-Cancel", "item": []},
+    {"name": "08-Report", "item": []}
+  ]
+}
