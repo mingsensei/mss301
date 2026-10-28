@@ -1,0 +1,461 @@
+{
+	"info": {
+		"_postman_id": "92e79d61-hotel-pe-2026-de190220",
+		"name": "MSS301_Hotel_Management_DE190220",
+		"description": "Comprehensive test collection for MSS301 Practical Exam: Room Service (8081), Reservation Service (8082), Hotel Gateway (8080)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Room Service (Port 8081)",
+			"item": [
+				{
+					"name": "POST Create Room (201 Success)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roomNumber\": \"R-101\",\n  \"roomType\": \"DOUBLE\",\n  \"pricePerNight\": 850000,\n  \"capacity\": 2,\n  \"floor\": 1\n}"
+						},
+						"url": {
+							"raw": "{{room_service_url}}/api/rooms",
+							"host": [
+								"{{room_service_url}}"
+							],
+							"path": [
+								"api",
+								"rooms"
+							]
+						}
+					}
+				},
+				{
+					"name": "POST Create Room Duplicate (226 IM_USED)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roomNumber\": \"R-101\",\n  \"roomType\": \"SINGLE\",\n  \"pricePerNight\": 500000,\n  \"capacity\": 1,\n  \"floor\": 1\n}"
+						},
+						"url": {
+							"raw": "{{room_service_url}}/api/rooms",
+							"host": [
+								"{{room_service_url}}"
+							],
+							"path": [
+								"api",
+								"rooms"
+							]
+						}
+					}
+				},
+				{
+					"name": "POST Create Room Validation Error (406 NOT_ACCEPTABLE)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"roomNumber\": \"\",\n  \"roomType\": \"PRESIDENTIAL\",\n  \"pricePerNight\": 0,\n  \"capacity\": 20,\n  \"floor\": 0\n}"
+						},
+						"url": {
+							"raw": "{{room_service_url}}/api/rooms",
+							"host": [
+								"{{room_service_url}}"
+							],
+							"path": [
+								"api",
+								"rooms"
+							]
+						}
+					}
+				},
+				{
+					"name": "PUT Update Room (200 Success)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"pricePerNight\": 950000,\n  \"capacity\": 3\n}"
+						},
+						"url": {
+							"raw": "{{room_service_url}}/api/rooms/1",
+							"host": [
+								"{{room_service_url}}"
+							],
+							"path": [
+								"api",
+								"rooms",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "GET Room By Id (200 Success)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{room_service_url}}/api/rooms/1",
+							"host": [
+								"{{room_service_url}}"
+							],
+							"path": [
+								"api",
+								"rooms",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "DELETE Set Room Maintenance (200 Success)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{room_service_url}}/api/rooms/1",
+							"host": [
+								"{{room_service_url}}"
+							],
+							"path": [
+								"api",
+								"rooms",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "GET Room List Paginated (200 Success)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{room_service_url}}/api/rooms?page=0&size=10&roomType=DOUBLE&status=AVAILABLE",
+							"host": [
+								"{{room_service_url}}"
+							],
+							"path": [
+								"api",
+								"rooms"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "roomType",
+									"value": "DOUBLE"
+								},
+								{
+									"key": "status",
+									"value": "AVAILABLE"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Reservation Service (Port 8082)",
+			"item": [
+				{
+					"name": "POST Create Reservation (201 Success)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"guestName\": \"Nguyen Van A\",\n  \"guestEmail\": \"a@example.com\",\n  \"guestPhone\": \"0901234567\",\n  \"checkInDate\": \"25/07/2026\",\n  \"checkOutDate\": \"28/07/2026\",\n  \"numberOfGuests\": 2,\n  \"roomId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{reservation_service_url}}/api/reservations",
+							"host": [
+								"{{reservation_service_url}}"
+							],
+							"path": [
+								"api",
+								"reservations"
+							]
+						}
+					}
+				},
+				{
+					"name": "POST Create Reservation Invalid Dates (406 NOT_ACCEPTABLE)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"guestName\": \"Nguyen Van A\",\n  \"guestEmail\": \"a@example.com\",\n  \"guestPhone\": \"0901234567\",\n  \"checkInDate\": \"28/07/2026\",\n  \"checkOutDate\": \"25/07/2026\",\n  \"numberOfGuests\": 2,\n  \"roomId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{reservation_service_url}}/api/reservations",
+							"host": [
+								"{{reservation_service_url}}"
+							],
+							"path": [
+								"api",
+								"reservations"
+							]
+						}
+					}
+				},
+				{
+					"name": "POST Create Reservation Room Not Found (404 NOT_FOUND)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"guestName\": \"Nguyen Van A\",\n  \"guestEmail\": \"a@example.com\",\n  \"guestPhone\": \"0901234567\",\n  \"checkInDate\": \"25/07/2026\",\n  \"checkOutDate\": \"28/07/2026\",\n  \"numberOfGuests\": 2,\n  \"roomId\": 9999\n}"
+						},
+						"url": {
+							"raw": "{{reservation_service_url}}/api/reservations",
+							"host": [
+								"{{reservation_service_url}}"
+							],
+							"path": [
+								"api",
+								"reservations"
+							]
+						}
+					}
+				},
+				{
+					"name": "PUT Update Reservation (200 Success)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"guestName\": \"Nguyen Van B\",\n  \"numberOfGuests\": 2\n}"
+						},
+						"url": {
+							"raw": "{{reservation_service_url}}/api/reservations/1",
+							"host": [
+								"{{reservation_service_url}}"
+							],
+							"path": [
+								"api",
+								"reservations",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "GET Reservation Detail (200 Success)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{reservation_service_url}}/api/reservations/1",
+							"host": [
+								"{{reservation_service_url}}"
+							],
+							"path": [
+								"api",
+								"reservations",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "DELETE Cancel Reservation (200 Success)",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{reservation_service_url}}/api/reservations/1",
+							"host": [
+								"{{reservation_service_url}}"
+							],
+							"path": [
+								"api",
+								"reservations",
+								"1"
+							]
+						}
+					}
+				},
+				{
+					"name": "GET Reservation List Paginated (200 Success)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{reservation_service_url}}/api/reservations?page=0&size=10&guestName=Nguyen&status=CONFIRMED",
+							"host": [
+								"{{reservation_service_url}}"
+							],
+							"path": [
+								"api",
+								"reservations"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "guestName",
+									"value": "Nguyen"
+								},
+								{
+									"key": "status",
+									"value": "CONFIRMED"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Hotel Gateway (Port 8080)",
+			"item": [
+				{
+					"name": "Gateway Route Room List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/api/rooms?page=0&size=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"rooms"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Gateway Route Reservation List",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/api/reservations?page=0&size=10",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"api",
+								"reservations"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Gateway Swagger UI",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{gateway_url}}/swagger-ui.html",
+							"host": [
+								"{{gateway_url}}"
+							],
+							"path": [
+								"swagger-ui.html"
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "room_service_url",
+			"value": "http://localhost:8081"
+		},
+		{
+			"key": "reservation_service_url",
+			"value": "http://localhost:8082"
+		},
+		{
+			"key": "gateway_url",
+			"value": "http://localhost:8080"
+		}
+	]
+}
