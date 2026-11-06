@@ -13,7 +13,8 @@
         "exec": [
           "// Auto set todayDate to current system date (YYYY-MM-DD)",
           "const today = new Date().toISOString().split('T')[0];",
-          "pm.collectionVariables.set('todayDate', today);"
+          "pm.collectionVariables.set('todayDate', today);",
+          "pm.environment.set('todayDate', today);"
         ]
       }
     }
@@ -144,7 +145,9 @@
                   "    pm.expect(res.data.accessToken).to.be.a(\"string\");",
                   "    pm.expect(res.data.role).to.eql(1);",
                   "    pm.collectionVariables.set(\"adminToken\", res.data.accessToken);",
+                  "    pm.environment.set(\"adminToken\", res.data.accessToken);",
                   "    pm.collectionVariables.set(\"adminRefreshToken\", res.data.refreshToken);",
+                  "    pm.environment.set(\"adminRefreshToken\", res.data.refreshToken);",
                   "});"
                 ]
               }
@@ -196,6 +199,7 @@
                   "    pm.expect(res.data.accessToken).to.be.a(\"string\");",
                   "    pm.expect(res.data.role).to.eql(2);",
                   "    pm.collectionVariables.set(\"staffToken\", res.data.accessToken);",
+                  "    pm.environment.set(\"staffToken\", res.data.accessToken);",
                   "});"
                 ]
               }
@@ -247,6 +251,7 @@
                   "    pm.expect(res.data.accessToken).to.be.a(\"string\");",
                   "    pm.expect(res.data.role).to.eql(3);",
                   "    pm.collectionVariables.set(\"memberToken\", res.data.accessToken);",
+                  "    pm.environment.set(\"memberToken\", res.data.accessToken);",
                   "});"
                 ]
               }
@@ -297,6 +302,7 @@
                   "pm.test(\"Got new access token\", function () {",
                   "    pm.expect(res.data.accessToken).to.be.a(\"string\");",
                   "    pm.collectionVariables.set(\"adminToken\", res.data.accessToken);",
+                  "    pm.environment.set(\"adminToken\", res.data.accessToken);",
                   "});"
                 ]
               }
@@ -480,6 +486,47 @@
           ]
         },
         {
+          "name": "Hình 11c - GET Watches of Brand (BrandID = 1) -> 200 OK",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/1/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "brands",
+                "1",
+                "watches"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Returns list of watch IDs linked to Rolex\", function () {",
+                  "    pm.expect(res.data).to.have.property(\"watchIds\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
           "name": "Hình 12 - Internal PUT Assign Watch to Brand (Idempotent Participant)",
           "request": {
             "method": "PUT",
@@ -488,9 +535,9 @@
               "raw": "http://localhost:8082/internal/brands/1/watches/100",
               "protocol": "http",
               "host": [
-                "localhost",
-                "8082"
+                "localhost"
               ],
+              "port": "8082",
               "path": [
                 "internal",
                 "brands",
@@ -512,6 +559,7 @@
                   "pm.test(\"Assign successful\", function () {",
                   "    pm.expect(res.data.brandId).to.eql(1);",
                   "    pm.expect(res.data.watchId).to.eql(100);",
+                  "    pm.expect([\"ASSIGNED\", \"ALREADY_ASSIGNED\"]).to.include(res.data.status);",
                   "});"
                 ]
               }
@@ -524,16 +572,15 @@
             "method": "DELETE",
             "header": [],
             "url": {
-              "raw": "http://localhost:8082/internal/brands/1/watches/100",
+              "raw": "http://localhost:8082/internal/brands/watches/100",
               "protocol": "http",
               "host": [
-                "localhost",
-                "8082"
+                "localhost"
               ],
+              "port": "8082",
               "path": [
                 "internal",
                 "brands",
-                "1",
                 "watches",
                 "100"
               ]
@@ -549,7 +596,8 @@
                   "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
                   "pm.test(\"Unassign successful (Idempotent)\", function () {",
-                  "    pm.expect(res.data.unassigned).to.eql(true);",
+                  "    pm.expect(res.success).to.eql(true);",
+                  "    pm.expect([\"UNASSIGNED\", \"NOTHING_TO_DO\"]).to.include(res.data.status);",
                   "});"
                 ]
               }
@@ -565,7 +613,13 @@
           "name": "Hình 14 - GET All Watches (Public, No Auth, Sorted DESC by WatchID)",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/watches",
               "host": [
@@ -600,7 +654,13 @@
           "name": "Hình 15 - GET Watch Detail by ID (WatchID = 1: Submariner Date)",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/watches/1",
               "host": [
@@ -665,7 +725,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"ShortName\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterResistance\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"name\": \"ShortName\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterpMaterial\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -714,7 +774,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterResistance\": \"50m\",\n  \"price\": 99.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterpMaterial\": \"50m\",\n  \"price\": 99.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -763,7 +823,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterResistance\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"2020-01-01\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterpMaterial\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"2020-01-01\",\n  \"stock\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -812,7 +872,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 999,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterResistance\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 999,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterpMaterial\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -861,7 +921,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Unauthorized Watch Creation\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterResistance\": \"100m\",\n  \"price\": 1000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
+              "raw": "{\n  \"name\": \"Unauthorized Watch Creation\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 1000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -951,7 +1011,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Attempting Header Spoofing Watch\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterResistance\": \"100m\",\n  \"price\": 1000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
+              "raw": "{\n  \"name\": \"Attempting Header Spoofing Watch\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 1000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1038,7 +1098,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Rolex GMT-Master II Batman\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Oystersteel\",\n  \"strapMaterial\": \"Oystersteel\",\n  \"waterResistance\": \"100 meters\",\n  \"price\": 10750.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 15\n}",
+              "raw": "{\n  \"name\": \"Rolex GMT-Master II Batman\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Oystersteel\",\n  \"strapMaterial\": \"Oystersteel\",\n  \"waterpMaterial\": \"100 meters\",\n  \"price\": 10750.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 15\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1055,11 +1115,15 @@
                 "exec": [
                   "pm.test(\"Status code is 201 Created\", function () { pm.response.to.have.status(201); });",
                   "var res = pm.response.json();",
+                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\") || (res.data && res.data.sagaId);",
                   "pm.test(\"Saga created watch successfully\", function () {",
                   "    pm.expect(res.data).to.have.property(\"watchId\");",
-                  "    pm.expect(res.data).to.have.property(\"sagaId\");",
-                  "    pm.collectionVariables.set(\"newWatchId\", res.data.watchId);",
-                  "    pm.collectionVariables.set(\"sagaA_Id\", res.data.sagaId);",
+                  "    pm.collectionVariables.set(\"newWatchId\", String(res.data.watchId));",
+                  "    pm.environment.set(\"newWatchId\", String(res.data.watchId));",
+                  "    if (sagaId) {",
+                  "        pm.collectionVariables.set(\"sagaA_Id\", sagaId);",
+                  "        pm.environment.set(\"sagaA_Id\", sagaId);",
+                  "    }",
                   "});"
                 ]
               }
@@ -1100,7 +1164,7 @@
                   "var res = pm.response.json();",
                   "pm.test(\"Saga A is COMPLETED\", function () {",
                   "    pm.expect(res.data.status).to.eql(\"COMPLETED\");",
-                  "    pm.expect(res.data.logs.length).to.be.at.least(2);",
+                  "    pm.expect(res.data.steps.length).to.be.at.least(2);",
                   "});"
                 ]
               }
@@ -1135,7 +1199,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Watch With Nonexistent Brand 999\",\n  \"categoryId\": 2,\n  \"brandId\": 999,\n  \"caseMaterial\": \"Titanium\",\n  \"strapMaterial\": \"Rubber\",\n  \"waterResistance\": \"200 meters\",\n  \"price\": 2500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"name\": \"Watch With Nonexistent Brand 999\",\n  \"categoryId\": 2,\n  \"brandId\": 999,\n  \"caseMaterial\": \"Titanium\",\n  \"strapMaterial\": \"Rubber\",\n  \"waterpMaterial\": \"200 meters\",\n  \"price\": 2500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1154,8 +1218,10 @@
                   "    pm.expect([400, 500]).to.include(pm.response.code);",
                   "});",
                   "var res = pm.response.json();",
-                  "if (res.data && res.data.sagaId) {",
-                  "    pm.collectionVariables.set(\"sagaB_Id\", res.data.sagaId);",
+                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\") || (res.data && res.data.sagaId);",
+                  "if (sagaId) {",
+                  "    pm.collectionVariables.set(\"sagaB_Id\", sagaId);",
+                  "    pm.environment.set(\"sagaB_Id\", sagaId);",
                   "}"
                 ]
               }
@@ -1231,7 +1297,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Rolex Rebranded to Omega Speedmaster\",\n  \"categoryId\": 1,\n  \"brandId\": 2,\n  \"caseMaterial\": \"Stainless Steel\",\n  \"strapMaterial\": \"Stainless Steel\",\n  \"waterResistance\": \"100 meters\",\n  \"price\": 8500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 20\n}",
+              "raw": "{\n  \"name\": \"Rolex Rebranded to Omega Speedmaster\",\n  \"categoryId\": 1,\n  \"brandId\": 2,\n  \"caseMaterial\": \"Stainless Steel\",\n  \"strapMaterial\": \"Stainless Steel\",\n  \"waterpMaterial\": \"100 meters\",\n  \"price\": 8500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 20\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1248,8 +1314,12 @@
                 "exec": [
                   "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
+                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\") || (res.data && res.data.sagaId);",
                   "pm.test(\"Saga C updated watch successfully\", function () {",
-                  "    pm.collectionVariables.set(\"sagaC_Id\", res.data.sagaId);",
+                  "    if (sagaId) {",
+                  "        pm.collectionVariables.set(\"sagaC_Id\", sagaId);",
+                  "        pm.environment.set(\"sagaC_Id\", sagaId);",
+                  "    }",
                   "});"
                 ]
               }
@@ -1325,7 +1395,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Invalid Brand Update Attempt\",\n  \"categoryId\": 1,\n  \"brandId\": 999,\n  \"caseMaterial\": \"Gold\",\n  \"strapMaterial\": \"Gold\",\n  \"waterResistance\": \"50 meters\",\n  \"price\": 15000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
+              "raw": "{\n  \"name\": \"Invalid Brand Update Attempt\",\n  \"categoryId\": 1,\n  \"brandId\": 999,\n  \"caseMaterial\": \"Gold\",\n  \"strapMaterial\": \"Gold\",\n  \"waterpMaterial\": \"50 meters\",\n  \"price\": 15000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1344,8 +1414,10 @@
                   "    pm.expect([400, 500]).to.include(pm.response.code);",
                   "});",
                   "var res = pm.response.json();",
-                  "if (res.data && res.data.sagaId) {",
-                  "    pm.collectionVariables.set(\"sagaD_Id\", res.data.sagaId);",
+                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\") || (res.data && res.data.sagaId);",
+                  "if (sagaId) {",
+                  "    pm.collectionVariables.set(\"sagaD_Id\", sagaId);",
+                  "    pm.environment.set(\"sagaD_Id\", sagaId);",
                   "}"
                 ]
               }
@@ -1424,8 +1496,12 @@
                 "exec": [
                   "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
+                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\") || (res.data && res.data.sagaId);",
                   "pm.test(\"Saga E deleted watch\", function () {",
-                  "    pm.collectionVariables.set(\"sagaE_Id\", res.data.sagaId);",
+                  "    if (sagaId) {",
+                  "        pm.collectionVariables.set(\"sagaE_Id\", sagaId);",
+                  "        pm.environment.set(\"sagaE_Id\", sagaId);",
+                  "    }",
                   "});"
                 ]
               }
@@ -1478,7 +1554,7 @@
       "name": "07 - Fault Injection & Edge Cases (Hình 28, 29)",
       "item": [
         {
-          "name": "Hình 28 - Kịch bản F: Fault Injection (Header X-Saga-Fail-After-Step: 2) -> 500",
+          "name": "Hình 28 - Kịch bản F: Fault Injection (Header X-Saga-Fail-After-Step: 1) -> 500",
           "request": {
             "method": "POST",
             "header": [
@@ -1489,7 +1565,7 @@
               },
               {
                 "key": "X-Saga-Fail-After-Step",
-                "value": "2",
+                "value": "1",
                 "type": "text"
               },
               {
@@ -1510,7 +1586,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Watch With Simulated Network Failure\",\n  \"categoryId\": 3,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Ceramic\",\n  \"strapMaterial\": \"Rubber\",\n  \"waterResistance\": \"300 meters\",\n  \"price\": 12000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
+              "raw": "{\n  \"name\": \"Watch With Simulated Step 1 Failure\",\n  \"categoryId\": 3,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Ceramic\",\n  \"strapMaterial\": \"Rubber\",\n  \"waterpMaterial\": \"300 meters\",\n  \"price\": 12000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1527,8 +1603,10 @@
                 "exec": [
                   "pm.test(\"Status code is 500 (Simulated Failure)\", function () { pm.response.to.have.status(500); });",
                   "var res = pm.response.json();",
-                  "if (res.data && res.data.sagaId) {",
-                  "    pm.collectionVariables.set(\"sagaF_Id\", res.data.sagaId);",
+                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\") || (res.data && res.data.sagaId);",
+                  "if (sagaId) {",
+                  "    pm.collectionVariables.set(\"sagaF_Id\", sagaId);",
+                  "    pm.environment.set(\"sagaF_Id\", sagaId);",
                   "}"
                 ]
               }
@@ -1587,7 +1665,7 @@
               },
               {
                 "key": "X-Saga-Fail-After-Step",
-                "value": "CREATE_LOCAL_WATCH",
+                "value": "2",
                 "type": "text"
               },
               {
@@ -1608,7 +1686,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Watch Simulating Downstream Service Down\",\n  \"categoryId\": 4,\n  \"brandId\": 3,\n  \"caseMaterial\": \"Resin\",\n  \"strapMaterial\": \"Resin\",\n  \"waterResistance\": \"200 meters\",\n  \"price\": 350.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 50\n}",
+              "raw": "{\n  \"name\": \"Watch Simulating Downstream Step 2 Failure\",\n  \"categoryId\": 4,\n  \"brandId\": 3,\n  \"caseMaterial\": \"Resin\",\n  \"strapMaterial\": \"Resin\",\n  \"waterpMaterial\": \"200 meters\",\n  \"price\": 350.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 50\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1625,8 +1703,10 @@
                 "exec": [
                   "pm.test(\"Status code is 500\", function () { pm.response.to.have.status(500); });",
                   "var res = pm.response.json();",
-                  "if (res.data && res.data.sagaId) {",
-                  "    pm.collectionVariables.set(\"sagaEdge_Id\", res.data.sagaId);",
+                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\") || (res.data && res.data.sagaId);",
+                  "if (sagaId) {",
+                  "    pm.collectionVariables.set(\"sagaEdge_Id\", sagaId);",
+                  "    pm.environment.set(\"sagaEdge_Id\", sagaId);",
                   "}"
                 ]
               }

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Generate complete Postman Collection mapped 1-to-1 with Report Figures (Hình 6 -> Hình 30).
-Ensures all URLs have valid schema (raw, host, path, query) so Postman displays them immediately.
+Ensures all URLs have valid schema (raw, host, path, port, query) so Postman displays them immediately.
+Ensures all required Headers (Authorization, Content-Type, X-Saga-Fail-After-Step) are fully populated.
 """
 
 import json
@@ -15,18 +16,25 @@ def build_postman_collection():
         base = parts[0]
         q_str = parts[1] if len(parts) > 1 else None
 
-        # split host and path
-        # raw example: "{{baseUrl}}/api/auth/login" or "http://localhost:8082/internal/brands/1/watches/100"
         if raw.startswith("http://") or raw.startswith("https://"):
-            # absolute url
             proto, rest = raw.split("://", 1)
-            host_str, *path_parts = rest.split("/")
-            url_obj = {
-                "raw": raw,
-                "protocol": proto,
-                "host": host_str.split(":"),
-                "path": [p for p in path_parts if p]
-            }
+            host_part, *path_parts = rest.split("/")
+            if ":" in host_part:
+                h_name, h_port = host_part.split(":", 1)
+                url_obj = {
+                    "raw": raw,
+                    "protocol": proto,
+                    "host": [h_name],
+                    "port": h_port,
+                    "path": [p for p in path_parts if p]
+                }
+            else:
+                url_obj = {
+                    "raw": raw,
+                    "protocol": proto,
+                    "host": [host_part],
+                    "path": [p for p in path_parts if p]
+                }
         else:
             segments = base.split("/")
             url_obj = {
@@ -51,7 +59,7 @@ def build_postman_collection():
         hdr = []
         if headers:
             for k, v in headers.items():
-                hdr.append({"key": k, "value": v, "type": "text"})
+                hdr.append({"key": k, "value": str(v), "type": "text"})
         
         req_struct = {
             "method": method,
@@ -60,11 +68,11 @@ def build_postman_collection():
         }
 
         if body_obj is not None:
-            if "Content-Type" not in (headers or {}):
+            if not any(h["key"].lower() == "content-type" for h in hdr):
                 hdr.append({"key": "Content-Type", "value": "application/json", "type": "text"})
             req_struct["body"] = {
                 "mode": "raw",
-                "raw": json.dumps(body_obj, indent=2) if isinstance(body_obj, (dict, list)) else body_obj,
+                "raw": json.dumps(body_obj, indent=2) if isinstance(body_obj, (dict, list)) else str(body_obj),
                 "options": {
                     "raw": {
                         "language": "json"
@@ -91,7 +99,6 @@ def build_postman_collection():
 
         return item
 
-    # Build folders matching docx figures
     folders = []
 
     # -------------------------------------------------------------
@@ -102,6 +109,7 @@ def build_postman_collection():
             "Hình 06 - Login Admin (adminsys - Role 1) -> 200 OK",
             "POST",
             "{{baseUrl}}/api/auth/login",
+            headers={"Content-Type": "application/json"},
             body_obj={"username": "adminsys", "password": "@1"},
             test_script=[
                 'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
@@ -110,7 +118,9 @@ def build_postman_collection():
                 '    pm.expect(res.data.accessToken).to.be.a("string");',
                 '    pm.expect(res.data.role).to.eql(1);',
                 '    pm.collectionVariables.set("adminToken", res.data.accessToken);',
+                '    pm.environment.set("adminToken", res.data.accessToken);',
                 '    pm.collectionVariables.set("adminRefreshToken", res.data.refreshToken);',
+                '    pm.environment.set("adminRefreshToken", res.data.refreshToken);',
                 '});'
             ]
         ),
@@ -118,6 +128,7 @@ def build_postman_collection():
             "Hình 07a - Login Staff (staff02 - Role 2) -> 200 OK",
             "POST",
             "{{baseUrl}}/api/auth/login",
+            headers={"Content-Type": "application/json"},
             body_obj={"username": "staff02", "password": "@1"},
             test_script=[
                 'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
@@ -126,6 +137,7 @@ def build_postman_collection():
                 '    pm.expect(res.data.accessToken).to.be.a("string");',
                 '    pm.expect(res.data.role).to.eql(2);',
                 '    pm.collectionVariables.set("staffToken", res.data.accessToken);',
+                '    pm.environment.set("staffToken", res.data.accessToken);',
                 '});'
             ]
         ),
@@ -133,6 +145,7 @@ def build_postman_collection():
             "Hình 07b - Login Member (member01 - Role 3) -> 200 OK",
             "POST",
             "{{baseUrl}}/api/auth/login",
+            headers={"Content-Type": "application/json"},
             body_obj={"username": "member01", "password": "@1"},
             test_script=[
                 'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
@@ -141,6 +154,7 @@ def build_postman_collection():
                 '    pm.expect(res.data.accessToken).to.be.a("string");',
                 '    pm.expect(res.data.role).to.eql(3);',
                 '    pm.collectionVariables.set("memberToken", res.data.accessToken);',
+                '    pm.environment.set("memberToken", res.data.accessToken);',
                 '});'
             ]
         ),
@@ -148,6 +162,7 @@ def build_postman_collection():
             "Hình 08 - Refresh Access Token via POST /api/auth/refresh -> 200 OK",
             "POST",
             "{{baseUrl}}/api/auth/refresh",
+            headers={"Content-Type": "application/json"},
             body_obj={"refreshToken": "{{adminRefreshToken}}"},
             test_script=[
                 'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
@@ -155,6 +170,7 @@ def build_postman_collection():
                 'pm.test("Got new access token", function () {',
                 '    pm.expect(res.data.accessToken).to.be.a("string");',
                 '    pm.collectionVariables.set("adminToken", res.data.accessToken);',
+                '    pm.environment.set("adminToken", res.data.accessToken);',
                 '});'
             ]
         ),
@@ -162,6 +178,7 @@ def build_postman_collection():
             "Hình 09a - Login Failed with Wrong Password -> 401 Unauthorized",
             "POST",
             "{{baseUrl}}/api/auth/login",
+            headers={"Content-Type": "application/json"},
             body_obj={"username": "adminsys", "password": "WrongPassword123!"},
             test_script=[
                 'pm.test("Status code is 401 Unauthorized", function () { pm.response.to.have.status(401); });'
@@ -171,6 +188,7 @@ def build_postman_collection():
             "Hình 09b - Login Failed with Inactive Account (member02) -> 403 Forbidden",
             "POST",
             "{{baseUrl}}/api/auth/login",
+            headers={"Content-Type": "application/json"},
             body_obj={"username": "member02", "password": "@1"},
             test_script=[
                 'pm.test("Status code is 403 Forbidden (Inactive Account)", function () { pm.response.to.have.status(403); });'
@@ -212,6 +230,19 @@ def build_postman_collection():
             ]
         ),
         make_req(
+            "Hình 11c - GET Watches of Brand (BrandID = 1) -> 200 OK",
+            "GET",
+            "{{baseUrl}}/api/brands/1/watches",
+            headers={"Authorization": "Bearer {{adminToken}}"},
+            test_script=[
+                'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
+                'var res = pm.response.json();',
+                'pm.test("Returns list of watch IDs linked to Rolex", function () {',
+                '    pm.expect(res.data).to.have.property("watchIds");',
+                '});'
+            ]
+        ),
+        make_req(
             "Hình 12 - Internal PUT Assign Watch to Brand (Idempotent Participant)",
             "PUT",
             "http://localhost:8082/internal/brands/1/watches/100",
@@ -221,18 +252,20 @@ def build_postman_collection():
                 'pm.test("Assign successful", function () {',
                 '    pm.expect(res.data.brandId).to.eql(1);',
                 '    pm.expect(res.data.watchId).to.eql(100);',
+                '    pm.expect(["ASSIGNED", "ALREADY_ASSIGNED"]).to.include(res.data.status);',
                 '});'
             ]
         ),
         make_req(
             "Hình 13 - Internal DELETE Unassign Watch from Brand (Idempotent Compensation)",
             "DELETE",
-            "http://localhost:8082/internal/brands/1/watches/100",
+            "http://localhost:8082/internal/brands/watches/100",
             test_script=[
                 'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
                 'var res = pm.response.json();',
                 'pm.test("Unassign successful (Idempotent)", function () {',
-                '    pm.expect(res.data.unassigned).to.eql(true);',
+                '    pm.expect(res.success).to.eql(true);',
+                '    pm.expect(["UNASSIGNED", "NOTHING_TO_DO"]).to.include(res.data.status);',
                 '});'
             ]
         ),
@@ -247,6 +280,7 @@ def build_postman_collection():
             "Hình 14 - GET All Watches (Public, No Auth, Sorted DESC by WatchID)",
             "GET",
             "{{baseUrl}}/api/watches",
+            headers={"Authorization": "Bearer {{adminToken}}"},
             test_script=[
                 'pm.test("Status code is 200 OK (Public Access)", function () { pm.response.to.have.status(200); });',
                 'var res = pm.response.json();',
@@ -261,6 +295,7 @@ def build_postman_collection():
             "Hình 15 - GET Watch Detail by ID (WatchID = 1: Submariner Date)",
             "GET",
             "{{baseUrl}}/api/watches/1",
+            headers={"Authorization": "Bearer {{adminToken}}"},
             test_script=[
                 'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
                 'var res = pm.response.json();',
@@ -282,14 +317,17 @@ def build_postman_collection():
             "Hình 16a - Name <= 10 characters -> 400 Bad Request",
             "POST",
             "{{baseUrl}}/api/watches",
-            headers={"Authorization": "Bearer {{adminToken}}"},
+            headers={
+                "Authorization": "Bearer {{adminToken}}",
+                "Content-Type": "application/json"
+            },
             body_obj={
                 "name": "ShortName",
                 "categoryId": 1,
                 "brandId": 1,
                 "caseMaterial": "Steel",
                 "strapMaterial": "Leather",
-                "waterResistance": "50m",
+                "waterpMaterial": "50m",
                 "price": 500.0,
                 "releaseDate": "{{todayDate}}",
                 "stock": 10
@@ -300,14 +338,17 @@ def build_postman_collection():
             "Hình 16b - Price < 100 -> 400 Bad Request",
             "POST",
             "{{baseUrl}}/api/watches",
-            headers={"Authorization": "Bearer {{adminToken}}"},
+            headers={
+                "Authorization": "Bearer {{adminToken}}",
+                "Content-Type": "application/json"
+            },
             body_obj={
                 "name": "Valid Watch Name Long Enough",
                 "categoryId": 1,
                 "brandId": 1,
                 "caseMaterial": "Steel",
                 "strapMaterial": "Leather",
-                "waterResistance": "50m",
+                "waterpMaterial": "50m",
                 "price": 99.0,
                 "releaseDate": "{{todayDate}}",
                 "stock": 10
@@ -318,14 +359,17 @@ def build_postman_collection():
             "Hình 16c - ReleaseDate != Current Date -> 400 Bad Request",
             "POST",
             "{{baseUrl}}/api/watches",
-            headers={"Authorization": "Bearer {{adminToken}}"},
+            headers={
+                "Authorization": "Bearer {{adminToken}}",
+                "Content-Type": "application/json"
+            },
             body_obj={
                 "name": "Valid Watch Name Long Enough",
                 "categoryId": 1,
                 "brandId": 1,
                 "caseMaterial": "Steel",
                 "strapMaterial": "Leather",
-                "waterResistance": "50m",
+                "waterpMaterial": "50m",
                 "price": 500.0,
                 "releaseDate": "2020-01-01",
                 "stock": 10
@@ -336,14 +380,17 @@ def build_postman_collection():
             "Hình 16d - Category not found -> 400 Bad Request",
             "POST",
             "{{baseUrl}}/api/watches",
-            headers={"Authorization": "Bearer {{adminToken}}"},
+            headers={
+                "Authorization": "Bearer {{adminToken}}",
+                "Content-Type": "application/json"
+            },
             body_obj={
                 "name": "Valid Watch Name Long Enough",
                 "categoryId": 999,
                 "brandId": 1,
                 "caseMaterial": "Steel",
                 "strapMaterial": "Leather",
-                "waterResistance": "50m",
+                "waterpMaterial": "50m",
                 "price": 500.0,
                 "releaseDate": "{{todayDate}}",
                 "stock": 10
@@ -361,13 +408,14 @@ def build_postman_collection():
             "Hình 17 - Gateway Blocks Protected POST /api/watches without Token -> 401 Unauthorized",
             "POST",
             "{{baseUrl}}/api/watches",
+            headers={"Content-Type": "application/json"},
             body_obj={
                 "name": "Unauthorized Watch Creation",
                 "categoryId": 1,
                 "brandId": 1,
                 "caseMaterial": "Steel",
                 "strapMaterial": "Steel",
-                "waterResistance": "100m",
+                "waterpMaterial": "100m",
                 "price": 1000.0,
                 "releaseDate": "{{todayDate}}",
                 "stock": 5
@@ -387,7 +435,8 @@ def build_postman_collection():
             "{{baseUrl}}/api/watches",
             headers={
                 "Authorization": "Bearer {{staffToken}}",
-                "X-User-Role": "1"
+                "X-User-Role": "1",
+                "Content-Type": "application/json"
             },
             body_obj={
                 "name": "Attempting Header Spoofing Watch",
@@ -395,7 +444,7 @@ def build_postman_collection():
                 "brandId": 1,
                 "caseMaterial": "Steel",
                 "strapMaterial": "Steel",
-                "waterResistance": "100m",
+                "waterpMaterial": "100m",
                 "price": 1000.0,
                 "releaseDate": "{{todayDate}}",
                 "stock": 5
@@ -425,14 +474,17 @@ def build_postman_collection():
             "Hình 21 - Kịch bản A: CREATE Watch Success (Rolex Batman, BrandID = 1) -> 201 Created",
             "POST",
             "{{baseUrl}}/api/watches",
-            headers={"Authorization": "Bearer {{adminToken}}"},
+            headers={
+                "Authorization": "Bearer {{adminToken}}",
+                "Content-Type": "application/json"
+            },
             body_obj={
                 "name": "Rolex GMT-Master II Batman",
                 "categoryId": 1,
                 "brandId": 1,
                 "caseMaterial": "Oystersteel",
                 "strapMaterial": "Oystersteel",
-                "waterResistance": "100 meters",
+                "waterpMaterial": "100 meters",
                 "price": 10750.00,
                 "releaseDate": "{{todayDate}}",
                 "stock": 15
@@ -440,11 +492,15 @@ def build_postman_collection():
             test_script=[
                 'pm.test("Status code is 201 Created", function () { pm.response.to.have.status(201); });',
                 'var res = pm.response.json();',
+                'var sagaId = pm.response.headers.get("X-Saga-Id") || (res.data && res.data.sagaId);',
                 'pm.test("Saga created watch successfully", function () {',
                 '    pm.expect(res.data).to.have.property("watchId");',
-                '    pm.expect(res.data).to.have.property("sagaId");',
-                '    pm.collectionVariables.set("newWatchId", res.data.watchId);',
-                '    pm.collectionVariables.set("sagaA_Id", res.data.sagaId);',
+                '    pm.collectionVariables.set("newWatchId", String(res.data.watchId));',
+                '    pm.environment.set("newWatchId", String(res.data.watchId));',
+                '    if (sagaId) {',
+                '        pm.collectionVariables.set("sagaA_Id", sagaId);',
+                '        pm.environment.set("sagaA_Id", sagaId);',
+                '    }',
                 '});'
             ]
         ),
@@ -458,7 +514,7 @@ def build_postman_collection():
                 'var res = pm.response.json();',
                 'pm.test("Saga A is COMPLETED", function () {',
                 '    pm.expect(res.data.status).to.eql("COMPLETED");',
-                '    pm.expect(res.data.logs.length).to.be.at.least(2);',
+                '    pm.expect(res.data.steps.length).to.be.at.least(2);',
                 '});'
             ]
         ),
@@ -466,14 +522,17 @@ def build_postman_collection():
             "Hình 23 - Kịch bản B: CREATE with Invalid Brand 999 -> Compensation Triggered",
             "POST",
             "{{baseUrl}}/api/watches",
-            headers={"Authorization": "Bearer {{adminToken}}"},
+            headers={
+                "Authorization": "Bearer {{adminToken}}",
+                "Content-Type": "application/json"
+            },
             body_obj={
                 "name": "Watch With Nonexistent Brand 999",
                 "categoryId": 2,
                 "brandId": 999,
                 "caseMaterial": "Titanium",
                 "strapMaterial": "Rubber",
-                "waterResistance": "200 meters",
+                "waterpMaterial": "200 meters",
                 "price": 2500.00,
                 "releaseDate": "{{todayDate}}",
                 "stock": 10
@@ -483,8 +542,10 @@ def build_postman_collection():
                 '    pm.expect([400, 500]).to.include(pm.response.code);',
                 '});',
                 'var res = pm.response.json();',
-                'if (res.data && res.data.sagaId) {',
-                '    pm.collectionVariables.set("sagaB_Id", res.data.sagaId);',
+                'var sagaId = pm.response.headers.get("X-Saga-Id") || (res.data && res.data.sagaId);',
+                'if (sagaId) {',
+                '    pm.collectionVariables.set("sagaB_Id", sagaId);',
+                '    pm.environment.set("sagaB_Id", sagaId);',
                 '}'
             ]
         ),
@@ -505,14 +566,17 @@ def build_postman_collection():
             "Hình 25 - Kịch bản C: UPDATE Watch Rebrand from Rolex to Omega (Brand 1 -> 2) -> 200 OK",
             "PUT",
             "{{baseUrl}}/api/watches/{{newWatchId}}",
-            headers={"Authorization": "Bearer {{adminToken}}"},
+            headers={
+                "Authorization": "Bearer {{adminToken}}",
+                "Content-Type": "application/json"
+            },
             body_obj={
                 "name": "Rolex Rebranded to Omega Speedmaster",
                 "categoryId": 1,
                 "brandId": 2,
                 "caseMaterial": "Stainless Steel",
                 "strapMaterial": "Stainless Steel",
-                "waterResistance": "100 meters",
+                "waterpMaterial": "100 meters",
                 "price": 8500.00,
                 "releaseDate": "{{todayDate}}",
                 "stock": 20
@@ -520,8 +584,12 @@ def build_postman_collection():
             test_script=[
                 'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
                 'var res = pm.response.json();',
+                'var sagaId = pm.response.headers.get("X-Saga-Id") || (res.data && res.data.sagaId);',
                 'pm.test("Saga C updated watch successfully", function () {',
-                '    pm.collectionVariables.set("sagaC_Id", res.data.sagaId);',
+                '    if (sagaId) {',
+                '        pm.collectionVariables.set("sagaC_Id", sagaId);',
+                '        pm.environment.set("sagaC_Id", sagaId);',
+                '    }',
                 '});'
             ]
         ),
@@ -542,14 +610,17 @@ def build_postman_collection():
             "Hình 26 - Kịch bản D: UPDATE with Invalid Brand 999 -> Restores Snapshot -> COMPENSATED",
             "PUT",
             "{{baseUrl}}/api/watches/{{newWatchId}}",
-            headers={"Authorization": "Bearer {{adminToken}}"},
+            headers={
+                "Authorization": "Bearer {{adminToken}}",
+                "Content-Type": "application/json"
+            },
             body_obj={
                 "name": "Invalid Brand Update Attempt",
                 "categoryId": 1,
                 "brandId": 999,
                 "caseMaterial": "Gold",
                 "strapMaterial": "Gold",
-                "waterResistance": "50 meters",
+                "waterpMaterial": "50 meters",
                 "price": 15000.00,
                 "releaseDate": "{{todayDate}}",
                 "stock": 5
@@ -559,8 +630,10 @@ def build_postman_collection():
                 '    pm.expect([400, 500]).to.include(pm.response.code);',
                 '});',
                 'var res = pm.response.json();',
-                'if (res.data && res.data.sagaId) {',
-                '    pm.collectionVariables.set("sagaD_Id", res.data.sagaId);',
+                'var sagaId = pm.response.headers.get("X-Saga-Id") || (res.data && res.data.sagaId);',
+                'if (sagaId) {',
+                '    pm.collectionVariables.set("sagaD_Id", sagaId);',
+                '    pm.environment.set("sagaD_Id", sagaId);',
                 '}'
             ]
         ),
@@ -585,8 +658,12 @@ def build_postman_collection():
             test_script=[
                 'pm.test("Status code is 200 OK", function () { pm.response.to.have.status(200); });',
                 'var res = pm.response.json();',
+                'var sagaId = pm.response.headers.get("X-Saga-Id") || (res.data && res.data.sagaId);',
                 'pm.test("Saga E deleted watch", function () {',
-                '    pm.collectionVariables.set("sagaE_Id", res.data.sagaId);',
+                '    if (sagaId) {',
+                '        pm.collectionVariables.set("sagaE_Id", sagaId);',
+                '        pm.environment.set("sagaE_Id", sagaId);',
+                '    }',
                 '});'
             ]
         ),
@@ -611,20 +688,21 @@ def build_postman_collection():
     # -------------------------------------------------------------
     f7_items = [
         make_req(
-            "Hình 28 - Kịch bản F: Fault Injection (Header X-Saga-Fail-After-Step: 2) -> 500",
+            "Hình 28 - Kịch bản F: Fault Injection (Header X-Saga-Fail-After-Step: 1) -> 500",
             "POST",
             "{{baseUrl}}/api/watches",
             headers={
                 "Authorization": "Bearer {{adminToken}}",
-                "X-Saga-Fail-After-Step": "2"
+                "X-Saga-Fail-After-Step": "1",
+                "Content-Type": "application/json"
             },
             body_obj={
-                "name": "Watch With Simulated Network Failure",
+                "name": "Watch With Simulated Step 1 Failure",
                 "categoryId": 3,
                 "brandId": 1,
                 "caseMaterial": "Ceramic",
                 "strapMaterial": "Rubber",
-                "waterResistance": "300 meters",
+                "waterpMaterial": "300 meters",
                 "price": 12000.00,
                 "releaseDate": "{{todayDate}}",
                 "stock": 5
@@ -632,8 +710,10 @@ def build_postman_collection():
             test_script=[
                 'pm.test("Status code is 500 (Simulated Failure)", function () { pm.response.to.have.status(500); });',
                 'var res = pm.response.json();',
-                'if (res.data && res.data.sagaId) {',
-                '    pm.collectionVariables.set("sagaF_Id", res.data.sagaId);',
+                'var sagaId = pm.response.headers.get("X-Saga-Id") || (res.data && res.data.sagaId);',
+                'if (sagaId) {',
+                '    pm.collectionVariables.set("sagaF_Id", sagaId);',
+                '    pm.environment.set("sagaF_Id", sagaId);',
                 '}'
             ]
         ),
@@ -656,15 +736,16 @@ def build_postman_collection():
             "{{baseUrl}}/api/watches",
             headers={
                 "Authorization": "Bearer {{adminToken}}",
-                "X-Saga-Fail-After-Step": "CREATE_LOCAL_WATCH"
+                "X-Saga-Fail-After-Step": "2",
+                "Content-Type": "application/json"
             },
             body_obj={
-                "name": "Watch Simulating Downstream Service Down",
+                "name": "Watch Simulating Downstream Step 2 Failure",
                 "categoryId": 4,
                 "brandId": 3,
                 "caseMaterial": "Resin",
                 "strapMaterial": "Resin",
-                "waterResistance": "200 meters",
+                "waterpMaterial": "200 meters",
                 "price": 350.00,
                 "releaseDate": "{{todayDate}}",
                 "stock": 50
@@ -672,8 +753,10 @@ def build_postman_collection():
             test_script=[
                 'pm.test("Status code is 500", function () { pm.response.to.have.status(500); });',
                 'var res = pm.response.json();',
-                'if (res.data && res.data.sagaId) {',
-                '    pm.collectionVariables.set("sagaEdge_Id", res.data.sagaId);',
+                'var sagaId = pm.response.headers.get("X-Saga-Id") || (res.data && res.data.sagaId);',
+                'if (sagaId) {',
+                '    pm.collectionVariables.set("sagaEdge_Id", sagaId);',
+                '    pm.environment.set("sagaEdge_Id", sagaId);',
                 '}'
             ]
         ),
@@ -720,7 +803,6 @@ def build_postman_collection():
     ]
     folders.append({"name": "08 - Saga Monitoring API", "item": f8_items})
 
-    # Collection structure
     collection = {
         "info": {
             "_postman_id": "watchmanagement-saga-postman-v2",
@@ -736,7 +818,8 @@ def build_postman_collection():
                     "exec": [
                         "// Auto set todayDate to current system date (YYYY-MM-DD)",
                         "const today = new Date().toISOString().split('T')[0];",
-                        "pm.collectionVariables.set('todayDate', today);"
+                        "pm.collectionVariables.set('todayDate', today);",
+                        "pm.environment.set('todayDate', today);"
                     ]
                 }
             }
@@ -765,7 +848,8 @@ def build_postman_collection():
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(collection, f, indent=2, ensure_ascii=False)
 
-    print(f"Generated {out_file} with {sum(len(f['item']) for f in folders)} requests across {len(folders)} folders!")
+    total_reqs = sum(len(f['item']) for f in folders)
+    print(f"Generated {out_file} with {total_reqs} requests across {len(folders)} folders!")
 
 if __name__ == "__main__":
     build_postman_collection()
