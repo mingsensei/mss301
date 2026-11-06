@@ -31,9 +31,11 @@ public class InternalBrandController {
         return ResponseEntity.ok(ApiResponse.success(brandService.assignWatch(brandId, watchId), "Assigned"));
     }
 
-    @DeleteMapping("/watches/{watchId}")
+    @DeleteMapping({"/watches/{watchId}", "/{brandId}/watches/{watchId}"})
     @Operation(summary = "Gỡ watch khỏi brand (idempotent)")
-    public ResponseEntity<ApiResponse<AssignmentResponse>> unassign(@PathVariable Integer watchId) {
+    public ResponseEntity<ApiResponse<AssignmentResponse>> unassign(
+            @PathVariable(value = "brandId", required = false) Integer brandId,
+            @PathVariable("watchId") Integer watchId) {
         return ResponseEntity.ok(ApiResponse.success(brandService.unassignWatch(watchId), "Unassigned"));
     }
 }
