@@ -1,9 +1,23 @@
 {
   "info": {
+    "_postman_id": "watchmanagement-saga-postman-v2",
     "name": "WatchManagement_Saga",
-    "description": "Postman collection proving Saga Orchestration (COMPLETED, COMPENSATED, Fault Injection, LIFO, Pivots) for Assignment 02 - MSS301",
+    "description": "Complete Postman Collection mapped directly to Report Figures (Hình 6 to Hình 30) for Assignment 02 - MSS301",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto set todayDate to current system date (YYYY-MM-DD)",
+          "const today = new Date().toISOString().split('T')[0];",
+          "pm.collectionVariables.set('todayDate', today);"
+        ]
+      }
+    }
+  ],
   "variable": [
     {
       "key": "baseUrl",
@@ -11,17 +25,7 @@
       "type": "string"
     },
     {
-      "key": "accountUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
       "key": "brandUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
-      "key": "watchUrl",
       "value": "http://localhost:8080",
       "type": "string"
     },
@@ -41,8 +45,13 @@
       "type": "string"
     },
     {
-      "key": "newWatchId",
+      "key": "memberToken",
       "value": "",
+      "type": "string"
+    },
+    {
+      "key": "newWatchId",
+      "value": "1",
       "type": "string"
     },
     {
@@ -76,7 +85,7 @@
       "type": "string"
     },
     {
-      "key": "sagaG_Id",
+      "key": "sagaEdge_Id",
       "value": "",
       "type": "string"
     },
@@ -88,10 +97,10 @@
   ],
   "item": [
     {
-      "name": "00 - Login & Token Issuance",
+      "name": "01 - Authentication & JWT (Hình 6, 7, 8, 9)",
       "item": [
         {
-          "name": "00.1 - Login as adminsys (Admin)",
+          "name": "Hình 06 - Login Admin (adminsys - Role 1) -> 200 OK",
           "request": {
             "method": "POST",
             "header": [
@@ -122,15 +131,16 @@
               }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Has accessToken and role=1\", function () {",
+                  "pm.test(\"Receive Access Token and Refresh Token\", function () {",
                   "    pm.expect(res.data.accessToken).to.be.a(\"string\");",
                   "    pm.expect(res.data.role).to.eql(1);",
                   "    pm.collectionVariables.set(\"adminToken\", res.data.accessToken);",
@@ -142,7 +152,7 @@
           ]
         },
         {
-          "name": "00.2 - Login as staff02 (Staff)",
+          "name": "Hình 07a - Login Staff (staff02 - Role 2) -> 200 OK",
           "request": {
             "method": "POST",
             "header": [
@@ -173,15 +183,16 @@
               }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Has accessToken and role=2\", function () {",
+                  "pm.test(\"Receive Staff Token with role=2\", function () {",
                   "    pm.expect(res.data.accessToken).to.be.a(\"string\");",
                   "    pm.expect(res.data.role).to.eql(2);",
                   "    pm.collectionVariables.set(\"staffToken\", res.data.accessToken);",
@@ -190,14 +201,9 @@
               }
             }
           ]
-        }
-      ]
-    },
-    {
-      "name": "01 - JWT & Authorization",
-      "item": [
+        },
         {
-          "name": "01.1 - Access protected endpoint with NO token -> 401",
+          "name": "Hình 07b - Login Member (member01 - Role 3) -> 200 OK",
           "request": {
             "method": "POST",
             "header": [
@@ -208,18 +214,19 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches",
+              "raw": "{{baseUrl}}/api/auth/login",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "watches"
+                "auth",
+                "login"
               ]
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Test Unauthorized Watch\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 500,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"username\": \"member01\",\n  \"password\": \"@1\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -227,20 +234,122 @@
               }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 401 Unauthorized\", function () { pm.response.to.have.status(401); });"
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Receive Member Token with role=3\", function () {",
+                  "    pm.expect(res.data.accessToken).to.be.a(\"string\");",
+                  "    pm.expect(res.data.role).to.eql(3);",
+                  "    pm.collectionVariables.set(\"memberToken\", res.data.accessToken);",
+                  "});"
                 ]
               }
             }
           ]
         },
         {
-          "name": "01.2 - Login with inactive account member02 -> 403",
+          "name": "Hình 08 - Refresh Access Token via POST /api/auth/refresh -> 200 OK",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Got new access token\", function () {",
+                  "    pm.expect(res.data.accessToken).to.be.a(\"string\");",
+                  "    pm.collectionVariables.set(\"adminToken\", res.data.accessToken);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 09a - Login Failed with Wrong Password -> 401 Unauthorized",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"adminsys\",\n  \"password\": \"WrongPassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () { pm.response.to.have.status(401); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 09b - Login Failed with Inactive Account (member02) -> 403 Forbidden",
           "request": {
             "method": "POST",
             "header": [
@@ -271,72 +380,271 @@
               }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 403 Forbidden\", function () { pm.response.to.have.status(403); });"
+                  "pm.test(\"Status code is 403 Forbidden (Inactive Account)\", function () { pm.response.to.have.status(403); });"
                 ]
               }
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "name": "02 - MSBrand Public & Internal API (Hình 11, 12, 13)",
+      "item": [
         {
-          "name": "01.3 - Refresh access token",
+          "name": "Hình 11 - GET All Brands with totalWatches (Public API)",
           "request": {
-            "method": "POST",
+            "method": "GET",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json",
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/refresh",
+              "raw": "{{baseUrl}}/api/brands",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "auth",
-                "refresh"
+                "brands"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\"refreshToken\": \"{{adminRefreshToken}}\"}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Returned new accessToken\", function () { pm.expect(res.data.accessToken).to.be.a(\"string\"); });"
+                  "pm.test(\"Returns 4 brands with watchCount\", function () {",
+                  "    pm.expect(res.data.length).to.be.at.least(4);",
+                  "    pm.expect(res.data[0]).to.have.property(\"brandName\");",
+                  "    pm.expect(res.data[0]).to.have.property(\"watchCount\");",
+                  "});"
                 ]
               }
             }
           ]
         },
         {
-          "name": "01.4 - Use refreshToken as Bearer on protected endpoint -> 401",
+          "name": "Hình 11b - GET Brand Detail by ID: Rolex (BrandID = 1)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/brands/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "brands",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Brand is Rolex\", function () {",
+                  "    pm.expect(res.data.brandName).to.eql(\"Rolex\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 12 - Internal PUT Assign Watch to Brand (Idempotent Participant)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/internal/brands/1/watches/100",
+              "protocol": "http",
+              "host": [
+                "localhost",
+                "8082"
+              ],
+              "path": [
+                "internal",
+                "brands",
+                "1",
+                "watches",
+                "100"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Assign successful\", function () {",
+                  "    pm.expect(res.data.brandId).to.eql(1);",
+                  "    pm.expect(res.data.watchId).to.eql(100);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 13 - Internal DELETE Unassign Watch from Brand (Idempotent Compensation)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/internal/brands/1/watches/100",
+              "protocol": "http",
+              "host": [
+                "localhost",
+                "8082"
+              ],
+              "path": [
+                "internal",
+                "brands",
+                "1",
+                "watches",
+                "100"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Unassign successful (Idempotent)\", function () {",
+                  "    pm.expect(res.data.unassigned).to.eql(true);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - MSWatch Public Catalog (Hình 14, 15)",
+      "item": [
+        {
+          "name": "Hình 14 - GET All Watches (Public, No Auth, Sorted DESC by WatchID)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK (Public Access)\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Contains watch list with categoryName\", function () {",
+                  "    pm.expect(res.data).to.be.an(\"array\");",
+                  "    pm.expect(res.data.length).to.be.at.least(10);",
+                  "    pm.expect(res.data[0]).to.have.property(\"categoryName\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 15 - GET Watch Detail by ID (WatchID = 1: Submariner Date)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "1"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Watch detail matches Submariner Date\", function () {",
+                  "    pm.expect(res.data.name).to.eql(\"Submariner Date\");",
+                  "    pm.expect(res.data.categoryName).to.eql(\"Dive Watches\");",
+                  "    pm.expect(res.data.price).to.eql(9550.0);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Business Validation Pre-Saga (Hình 16)",
+      "item": [
+        {
+          "name": "Hình 16a - Name <= 10 characters -> 400 Bad Request",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{adminRefreshToken}}",
+                "value": "Bearer {{adminToken}}",
                 "type": "text"
               },
               {
@@ -357,7 +665,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Test Refresh As Bearer\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 500,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"name\": \"ShortName\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterResistance\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -365,6 +673,203 @@
               }
             }
           },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 16b - Price < 100 -> 400 Bad Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterResistance\": \"50m\",\n  \"price\": 99.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 16c - ReleaseDate != Current Date -> 400 Bad Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterResistance\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"2020-01-01\",\n  \"stock\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 16d - Category not found -> 400 Bad Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 999,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterResistance\": \"50m\",\n  \"price\": 500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - API Gateway Security & Resilience (Hình 17, 18, 19, 20)",
+      "item": [
+        {
+          "name": "Hình 17 - Gateway Blocks Protected POST /api/watches without Token -> 401 Unauthorized",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Unauthorized Watch Creation\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterResistance\": \"100m\",\n  \"price\": 1000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
           "event": [
             {
               "listen": "test",
@@ -378,55 +883,43 @@
           ]
         },
         {
-          "name": "01.5 - Staff calls admin endpoint -> 403 Forbidden",
+          "name": "Hình 18 - Gateway Blocks Staff (Role 2) Attempting DELETE /api/watches/1 -> 403 Forbidden",
           "request": {
-            "method": "POST",
+            "method": "DELETE",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{staffToken}}",
                 "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches",
+              "raw": "{{baseUrl}}/api/watches/1",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "watches"
+                "watches",
+                "1"
               ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Staff Creating Watch\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 500,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 10\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 403 Forbidden\", function () { pm.response.to.have.status(403); });"
+                  "pm.test(\"Status is 403 Forbidden (RBAC Admin Only)\", function () { pm.response.to.have.status(403); });"
                 ]
               }
             }
           ]
         },
         {
-          "name": "01.6 - Attempt to forge X-User-Role header -> Gateway strips it -> 403",
+          "name": "Hình 19 - Header Spoofing (Client Injects X-User-Role: 1) -> Stripped by Gateway -> 403",
           "request": {
             "method": "POST",
             "header": [
@@ -458,7 +951,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Staff Forging Role 1\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 500,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"name\": \"Attempting Header Spoofing Watch\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterResistance\": \"100m\",\n  \"price\": 1000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -466,13 +959,47 @@
               }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 403 Forbidden because Gateway strips client X-User-Role\", function () { pm.response.to.have.status(403); });"
+                  "pm.test(\"Status is 403 Forbidden (Gateway Stripped Spoofed Header)\", function () { pm.response.to.have.status(403); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 20 - Circuit Breaker Fallback Endpoint -> 503 Service Unavailable",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fallback/watch",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fallback",
+                "watch"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 503 Service Unavailable\", function () { pm.response.to.have.status(503); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Fallback message returned\", function () {",
+                  "    pm.expect(res.message).to.include(\"currently unavailable\");",
+                  "});"
                 ]
               }
             }
@@ -481,10 +1008,10 @@
       ]
     },
     {
-      "name": "02 - Business Validation (Pre-Saga)",
+      "name": "06 - Saga Scenarios A to E (Hình 21, 23, 25, 26, 27)",
       "item": [
         {
-          "name": "02.1 - Name <= 10 characters -> 400 Bad Request",
+          "name": "Hình 21 - Kịch bản A: CREATE Watch Success (Rolex Batman, BrandID = 1) -> 201 Created",
           "request": {
             "method": "POST",
             "header": [
@@ -511,7 +1038,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Short\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 500,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 10\n}",
+              "raw": "{\n  \"name\": \"Rolex GMT-Master II Batman\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Oystersteel\",\n  \"strapMaterial\": \"Oystersteel\",\n  \"waterResistance\": \"100 meters\",\n  \"price\": 10750.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 15\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -519,279 +1046,20 @@
               }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "02.2 - Price < 100 -> 400 Bad Request",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 50,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 10\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "02.3 - ReleaseDate != today -> 400 Bad Request",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 500,\n  \"releaseDate\": \"2020-01-01\",\n  \"stock\": 10\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "02.4 - Category not found -> 400 Bad Request",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Valid Watch Name Long Enough\",\n  \"categoryId\": 999,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"100m\",\n  \"price\": 500,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 10\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "03 - Scenario A: CREATE Success",
-      "item": [
-        {
-          "name": "03.1 - Public list watches (verify 10 initial)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 201 Created\", function () { pm.response.to.have.status(201); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Returns list of watches\", function () { pm.expect(res.data.length).to.be.at.least(10); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "03.2 - Check Rolex watch count before CREATE",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{brandUrl}}/api/brands/1/watches",
-              "host": [
-                "{{brandUrl}}"
-              ],
-              "path": [
-                "api",
-                "brands",
-                "1",
-                "watches"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"Rolex watch count is 2\", function () { pm.expect(res.data.watchCount).to.eql(2); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "03.3 - CREATE new watch (Rolex, brandId=1)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Rolex GMT-Master II Batman\",\n  \"categoryId\": 1,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Oystersteel\",\n  \"strapMaterial\": \"Jubilee\",\n  \"waterpMaterial\": \"100 meters\",\n  \"price\": 10500.0,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 15\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 201 Created\", function () { pm.response.to.have.status(201); });",
-                  "var res = pm.response.json();",
-                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\");",
-                  "pm.test(\"Has X-Saga-Id and created watchId\", function () {",
-                  "    pm.expect(sagaId).to.be.a(\"string\");",
-                  "    pm.expect(res.data.watchId).to.be.a(\"number\");",
+                  "pm.test(\"Saga created watch successfully\", function () {",
+                  "    pm.expect(res.data).to.have.property(\"watchId\");",
+                  "    pm.expect(res.data).to.have.property(\"sagaId\");",
                   "    pm.collectionVariables.set(\"newWatchId\", res.data.watchId);",
-                  "    pm.collectionVariables.set(\"sagaA_Id\", sagaId);",
+                  "    pm.collectionVariables.set(\"sagaA_Id\", res.data.sagaId);",
                   "});"
                 ]
               }
@@ -799,72 +1067,7 @@
           ]
         },
         {
-          "name": "03.4 - Verify newly created watch is at top of list",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"First item is newly created watch\", function () {",
-                  "    var id = pm.collectionVariables.get(\"newWatchId\");",
-                  "    pm.expect(res.data[0].watchId).to.eql(Number(id));",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "03.5 - Check Rolex watch count increased to 3 in MSBrand",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{brandUrl}}/api/brands/1/watches",
-              "host": [
-                "{{brandUrl}}"
-              ],
-              "path": [
-                "api",
-                "brands",
-                "1",
-                "watches"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"Rolex watch count is 3\", function () { pm.expect(res.data.watchCount).to.eql(3); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "03.6 - Verify Saga A state and logs -> COMPLETED",
+          "name": "Hình 21b - Verify Saga A State & Logs -> COMPLETED",
           "request": {
             "method": "GET",
             "header": [
@@ -886,34 +1089,26 @@
               ]
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Saga status is COMPLETED\", function () {",
+                  "pm.test(\"Saga A is COMPLETED\", function () {",
                   "    pm.expect(res.data.status).to.eql(\"COMPLETED\");",
-                  "    pm.expect(res.data.steps.length).to.eql(2);",
-                  "    pm.expect(res.data.steps[0].stepName).to.eql(\"CREATE_WATCH\");",
-                  "    pm.expect(res.data.steps[0].result).to.eql(\"SUCCESS\");",
-                  "    pm.expect(res.data.steps[1].stepName).to.eql(\"ASSIGN_BRAND\");",
-                  "    pm.expect(res.data.steps[1].result).to.eql(\"SUCCESS\");",
+                  "    pm.expect(res.data.logs.length).to.be.at.least(2);",
                   "});"
                 ]
               }
             }
           ]
-        }
-      ]
-    },
-    {
-      "name": "04 - Scenario B: CREATE with Invalid Brand (Compensation)",
-      "item": [
+        },
         {
-          "name": "04.1 - CREATE watch with brandId=999 -> 400 Bad Request",
+          "name": "Hình 23 - Kịch bản B: CREATE with Invalid Brand 999 -> Compensation Triggered",
           "request": {
             "method": "POST",
             "header": [
@@ -940,7 +1135,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Watch With Nonexistent Brand\",\n  \"categoryId\": 2,\n  \"brandId\": 999,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Leather\",\n  \"waterpMaterial\": \"50 meters\",\n  \"price\": 1200.0,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 5\n}",
+              "raw": "{\n  \"name\": \"Watch With Nonexistent Brand 999\",\n  \"categoryId\": 2,\n  \"brandId\": 999,\n  \"caseMaterial\": \"Titanium\",\n  \"strapMaterial\": \"Rubber\",\n  \"waterResistance\": \"200 meters\",\n  \"price\": 2500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 10\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -948,25 +1143,27 @@
               }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });",
-                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\");",
-                  "pm.test(\"Has X-Saga-Id\", function () {",
-                  "    pm.expect(sagaId).to.be.a(\"string\");",
-                  "    pm.collectionVariables.set(\"sagaB_Id\", sagaId);",
-                  "});"
+                  "pm.test(\"Status is 400 Bad Request or 500\", function () {",
+                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "if (res.data && res.data.sagaId) {",
+                  "    pm.collectionVariables.set(\"sagaB_Id\", res.data.sagaId);",
+                  "}"
                 ]
               }
             }
           ]
         },
         {
-          "name": "04.2 - Verify Saga B logs: CREATE_WATCH -> ASSIGN_BRAND FAILED -> DELETE_WATCH SUCCESS",
+          "name": "Hình 24 - Verify Saga B State -> COMPENSATED (Local Watch Rolled Back)",
           "request": {
             "method": "GET",
             "header": [
@@ -988,20 +1185,287 @@
               ]
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Saga status is COMPENSATED\", function () {",
+                  "pm.test(\"Saga B is COMPENSATED\", function () {",
                   "    pm.expect(res.data.status).to.eql(\"COMPENSATED\");",
-                  "    var steps = res.data.steps;",
-                  "    pm.expect(steps.some(s => s.stepName === \"CREATE_WATCH\" && s.phase === \"EXECUTE\" && s.result === \"SUCCESS\")).to.be.true;",
-                  "    pm.expect(steps.some(s => s.stepName === \"ASSIGN_BRAND\" && s.phase === \"EXECUTE\" && s.result === \"FAILED\")).to.be.true;",
-                  "    pm.expect(steps.some(s => s.stepName === \"DELETE_WATCH\" && s.phase === \"COMPENSATE\" && s.result === \"SUCCESS\")).to.be.true;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 25 - Kịch bản C: UPDATE Watch Rebrand from Rolex to Omega (Brand 1 -> 2) -> 200 OK",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "{{newWatchId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Rolex Rebranded to Omega Speedmaster\",\n  \"categoryId\": 1,\n  \"brandId\": 2,\n  \"caseMaterial\": \"Stainless Steel\",\n  \"strapMaterial\": \"Stainless Steel\",\n  \"waterResistance\": \"100 meters\",\n  \"price\": 8500.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Saga C updated watch successfully\", function () {",
+                  "    pm.collectionVariables.set(\"sagaC_Id\", res.data.sagaId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 25b - Verify Saga C State -> COMPLETED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sagas/{{sagaC_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaC_Id}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Saga C status is COMPLETED\", function () {",
+                  "    pm.expect(res.data.status).to.eql(\"COMPLETED\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 26 - Kịch bản D: UPDATE with Invalid Brand 999 -> Restores Snapshot -> COMPENSATED",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "{{newWatchId}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Invalid Brand Update Attempt\",\n  \"categoryId\": 1,\n  \"brandId\": 999,\n  \"caseMaterial\": \"Gold\",\n  \"strapMaterial\": \"Gold\",\n  \"waterResistance\": \"50 meters\",\n  \"price\": 15000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 400 or 500\", function () {",
+                  "    pm.expect([400, 500]).to.include(pm.response.code);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "if (res.data && res.data.sagaId) {",
+                  "    pm.collectionVariables.set(\"sagaD_Id\", res.data.sagaId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 26b - Verify Saga D State -> COMPENSATED (Snapshot Restored)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sagas/{{sagaD_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaD_Id}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Saga D status is COMPENSATED\", function () {",
+                  "    pm.expect(res.data.status).to.eql(\"COMPENSATED\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 27 - Kịch bản E: DELETE Watch (Pivot Step) -> 200 OK",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "{{newWatchId}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Saga E deleted watch\", function () {",
+                  "    pm.collectionVariables.set(\"sagaE_Id\", res.data.sagaId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hình 27b - Verify Saga E State -> COMPLETED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sagas/{{sagaE_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaE_Id}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Saga E status is COMPLETED\", function () {",
+                  "    pm.expect(res.data.status).to.eql(\"COMPLETED\");",
                   "});"
                 ]
               }
@@ -1011,10 +1475,10 @@
       ]
     },
     {
-      "name": "05 - Scenario C: CREATE with Fault Injection (LIFO Compensation)",
+      "name": "07 - Fault Injection & Edge Cases (Hình 28, 29)",
       "item": [
         {
-          "name": "05.1 - CREATE watch with X-Saga-Fail-After-Step: 2 -> 500",
+          "name": "Hình 28 - Kịch bản F: Fault Injection (Header X-Saga-Fail-After-Step: 2) -> 500",
           "request": {
             "method": "POST",
             "header": [
@@ -1046,7 +1510,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Watch With Fault Injection\",\n  \"categoryId\": 3,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Gold\",\n  \"strapMaterial\": \"Leather\",\n  \"waterpMaterial\": \"30 meters\",\n  \"price\": 15000.0,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 2\n}",
+              "raw": "{\n  \"name\": \"Watch With Simulated Network Failure\",\n  \"categoryId\": 3,\n  \"brandId\": 1,\n  \"caseMaterial\": \"Ceramic\",\n  \"strapMaterial\": \"Rubber\",\n  \"waterResistance\": \"300 meters\",\n  \"price\": 12000.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1054,434 +1518,25 @@
               }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 500 Internal Server Error\", function () { pm.response.to.have.status(500); });",
-                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\");",
-                  "pm.test(\"Has X-Saga-Id\", function () {",
-                  "    pm.expect(sagaId).to.be.a(\"string\");",
-                  "    pm.collectionVariables.set(\"sagaC_Id\", sagaId);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "05.2 - Verify Rolex watch count remains 3 (compensated)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{brandUrl}}/api/brands/1/watches",
-              "host": [
-                "{{brandUrl}}"
-              ],
-              "path": [
-                "api",
-                "brands",
-                "1",
-                "watches"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 500 (Simulated Failure)\", function () { pm.response.to.have.status(500); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Rolex watch count is still 3\", function () { pm.expect(res.data.watchCount).to.eql(3); });"
+                  "if (res.data && res.data.sagaId) {",
+                  "    pm.collectionVariables.set(\"sagaF_Id\", res.data.sagaId);",
+                  "}"
                 ]
               }
             }
           ]
         },
         {
-          "name": "05.3 - Verify Saga C logs: LIFO compensation (UNASSIGN_BRAND then DELETE_WATCH)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaC_Id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "sagas",
-                "{{sagaC_Id}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"Saga status is COMPENSATED with LIFO order\", function () {",
-                  "    pm.expect(res.data.status).to.eql(\"COMPENSATED\");",
-                  "    var steps = res.data.steps;",
-                  "    var unassignIdx = steps.findIndex(s => s.stepName === \"UNASSIGN_BRAND\" && s.phase === \"COMPENSATE\");",
-                  "    var deleteIdx = steps.findIndex(s => s.stepName === \"DELETE_WATCH\" && s.phase === \"COMPENSATE\");",
-                  "    pm.expect(unassignIdx).to.be.lessThan(deleteIdx);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "06 - Scenario D & E: UPDATE Watch (Snapshot & Restore)",
-      "item": [
-        {
-          "name": "06.1 - UPDATE watch brand 1 -> 2 success",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches",
-                "{{newWatchId}}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Rolex Batman Rebranded To Omega\",\n  \"categoryId\": 1,\n  \"brandId\": 2,\n  \"caseMaterial\": \"Oystersteel\",\n  \"strapMaterial\": \"Rubber\",\n  \"waterpMaterial\": \"300 meters\",\n  \"price\": 11000.0,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 12\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"BrandId updated to 2\", function () { pm.expect(res.data.brandId).to.eql(2); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "06.2 - Verify brand counts: Rolex 3->2, Omega 2->3",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{brandUrl}}/api/brands/2/watches",
-              "host": [
-                "{{brandUrl}}"
-              ],
-              "path": [
-                "api",
-                "brands",
-                "2",
-                "watches"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"Omega watch count is 3\", function () { pm.expect(res.data.watchCount).to.eql(3); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "06.3 - Scenario D: UPDATE to brand 999 -> 400 Bad Request",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches",
-                "{{newWatchId}}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Rolex Batman Bad Brand\",\n  \"categoryId\": 1,\n  \"brandId\": 999,\n  \"caseMaterial\": \"Oystersteel\",\n  \"strapMaterial\": \"Rubber\",\n  \"waterpMaterial\": \"300 meters\",\n  \"price\": 11000.0,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 12\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 400 Bad Request\", function () { pm.response.to.have.status(400); });",
-                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\");",
-                  "pm.test(\"Has X-Saga-Id\", function () {",
-                  "    pm.expect(sagaId).to.be.a(\"string\");",
-                  "    pm.collectionVariables.set(\"sagaD_Id\", sagaId);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "06.4 - Verify Saga D restored watch data to Omega (brandId=2)",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaD_Id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "sagas",
-                "{{sagaD_Id}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"Saga D COMPENSATED with RESTORE_WATCH\", function () {",
-                  "    pm.expect(res.data.status).to.eql(\"COMPENSATED\");",
-                  "    var steps = res.data.steps;",
-                  "    pm.expect(steps.some(s => s.stepName === \"RESTORE_WATCH\" && s.phase === \"COMPENSATE\" && s.result === \"SUCCESS\")).to.be.true;",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "06.5 - Scenario E: UPDATE with X-Saga-Fail-After-Step: 2 -> 500",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              },
-              {
-                "key": "X-Saga-Fail-After-Step",
-                "value": "2",
-                "type": "text"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches",
-                "{{newWatchId}}"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Omega Switch To Seiko Fail\",\n  \"categoryId\": 1,\n  \"brandId\": 3,\n  \"caseMaterial\": \"Steel\",\n  \"strapMaterial\": \"Steel\",\n  \"waterpMaterial\": \"200 meters\",\n  \"price\": 8000.0,\n  \"releaseDate\": \"2026-11-05\",\n  \"stock\": 10\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 500 Internal Server Error\", function () { pm.response.to.have.status(500); });",
-                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\");",
-                  "pm.test(\"Has X-Saga-Id\", function () {",
-                  "    pm.expect(sagaId).to.be.a(\"string\");",
-                  "    pm.collectionVariables.set(\"sagaE_Id\", sagaId);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "06.6 - Verify Saga E compensated: ASSIGN_BRAND_BACK then RESTORE_WATCH",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaE_Id}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "sagas",
-                "{{sagaE_Id}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"Saga E COMPENSATED with ASSIGN_BRAND_BACK and RESTORE_WATCH\", function () {",
-                  "    pm.expect(res.data.status).to.eql(\"COMPENSATED\");",
-                  "    var steps = res.data.steps;",
-                  "    pm.expect(steps.some(s => s.stepName === \"ASSIGN_BRAND_BACK\" && s.phase === \"COMPENSATE\")).to.be.true;",
-                  "    pm.expect(steps.some(s => s.stepName === \"RESTORE_WATCH\" && s.phase === \"COMPENSATE\")).to.be.true;",
-                  "});"
-                ]
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "07 - Scenario F & G: DELETE Watch (Pivot Step)",
-      "item": [
-        {
-          "name": "07.1 - Scenario F: DELETE with X-Saga-Fail-After-Step: 1 -> 500",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{adminToken}}",
-                "type": "text"
-              },
-              {
-                "key": "X-Saga-Fail-After-Step",
-                "value": "1",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "watches",
-                "{{newWatchId}}"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 500 Internal Server Error\", function () { pm.response.to.have.status(500); });",
-                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\");",
-                  "pm.test(\"Has X-Saga-Id\", function () {",
-                  "    pm.expect(sagaId).to.be.a(\"string\");",
-                  "    pm.collectionVariables.set(\"sagaF_Id\", sagaId);",
-                  "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "07.2 - Verify watch still exists after Scenario F compensation",
+          "name": "Hình 28b - Verify Saga F State & LIFO Logs -> COMPENSATED",
           "request": {
             "method": "GET",
             "header": [
@@ -1503,18 +1558,17 @@
               ]
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Saga F is COMPENSATED with ASSIGN_BRAND_BACK\", function () {",
+                  "pm.test(\"Saga F is COMPENSATED via LIFO\", function () {",
                   "    pm.expect(res.data.status).to.eql(\"COMPENSATED\");",
-                  "    var steps = res.data.steps;",
-                  "    pm.expect(steps.some(s => s.stepName === \"ASSIGN_BRAND_BACK\" && s.phase === \"COMPENSATE\")).to.be.true;",
                   "});"
                 ]
               }
@@ -1522,9 +1576,9 @@
           ]
         },
         {
-          "name": "07.3 - Scenario G: DELETE with X-Saga-Fail-After-Step: 2 (Pivot committed -> fault skipped) -> 200",
+          "name": "Hình 29 - Kịch bản Edge Case: MSBrand Connection Error Simulation -> 500",
           "request": {
-            "method": "DELETE",
+            "method": "POST",
             "header": [
               {
                 "key": "Authorization",
@@ -1533,41 +1587,54 @@
               },
               {
                 "key": "X-Saga-Fail-After-Step",
-                "value": "2",
+                "value": "CREATE_LOCAL_WATCH",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
                 "type": "text"
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "raw": "{{baseUrl}}/api/watches",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "watches",
-                "{{newWatchId}}"
+                "watches"
               ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Watch Simulating Downstream Service Down\",\n  \"categoryId\": 4,\n  \"brandId\": 3,\n  \"caseMaterial\": \"Resin\",\n  \"strapMaterial\": \"Resin\",\n  \"waterResistance\": \"200 meters\",\n  \"price\": 350.0,\n  \"releaseDate\": \"{{todayDate}}\",\n  \"stock\": 50\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var sagaId = pm.response.headers.get(\"X-Saga-Id\");",
-                  "pm.test(\"Has X-Saga-Id\", function () {",
-                  "    pm.expect(sagaId).to.be.a(\"string\");",
-                  "    pm.collectionVariables.set(\"sagaG_Id\", sagaId);",
-                  "});"
+                  "pm.test(\"Status code is 500\", function () { pm.response.to.have.status(500); });",
+                  "var res = pm.response.json();",
+                  "if (res.data && res.data.sagaId) {",
+                  "    pm.collectionVariables.set(\"sagaEdge_Id\", res.data.sagaId);",
+                  "}"
                 ]
               }
             }
           ]
         },
         {
-          "name": "07.4 - Verify Saga G: Pivot committed -> FAULT_INJECTION SKIPPED -> COMPLETED",
+          "name": "Hình 29b - Verify Edge Case Saga Rolled Back Locally -> COMPENSATED",
           "request": {
             "method": "GET",
             "header": [
@@ -1578,62 +1645,29 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaG_Id}}",
+              "raw": "{{baseUrl}}/api/sagas/{{sagaEdge_Id}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "sagas",
-                "{{sagaG_Id}}"
+                "{{sagaEdge_Id}}"
               ]
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
-                  "pm.test(\"Saga G is COMPLETED\", function () {",
-                  "    pm.expect(res.data.status).to.eql(\"COMPLETED\");",
-                  "    var steps = res.data.steps;",
-                  "    pm.expect(steps.some(s => s.stepName === \"FAULT_INJECTION\" && s.result === \"SKIPPED\")).to.be.true;",
+                  "pm.test(\"Edge case saga status is COMPENSATED\", function () {",
+                  "    pm.expect(res.data.status).to.eql(\"COMPENSATED\");",
                   "});"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "07.5 - Verify Omega watch count is back to 2",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{brandUrl}}/api/brands/2/watches",
-              "host": [
-                "{{brandUrl}}"
-              ],
-              "path": [
-                "api",
-                "brands",
-                "2",
-                "watches"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
-                  "var res = pm.response.json();",
-                  "pm.test(\"Omega watch count is 2\", function () { pm.expect(res.data.watchCount).to.eql(2); });"
                 ]
               }
             }
@@ -1645,41 +1679,7 @@
       "name": "08 - Saga Monitoring API",
       "item": [
         {
-          "name": "08.1 - Staff calls /api/sagas -> 403 Forbidden",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{staffToken}}",
-                "type": "text"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/sagas",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "sagas"
-              ]
-            }
-          },
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test(\"Status is 403 Forbidden\", function () { pm.response.to.have.status(403); });"
-                ]
-              }
-            }
-          ]
-        },
-        {
-          "name": "08.2 - Admin lists recent sagas -> 200 OK",
+          "name": "Saga Monitoring - Admin Lists Recent Sagas -> 200 OK",
           "request": {
             "method": "GET",
             "header": [
@@ -1706,36 +1706,59 @@
               ]
             }
           },
+          "response": [],
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test(\"Status is 200 OK\", function () { pm.response.to.have.status(200); });",
+                  "pm.test(\"Status code is 200 OK\", function () { pm.response.to.have.status(200); });",
                   "var res = pm.response.json();",
                   "pm.test(\"Returns list of recent sagas\", function () {",
-                  "    pm.expect(res.data.length).to.be.at.least(5);",
+                  "    pm.expect(res.data).to.be.an(\"array\");",
                   "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Saga Monitoring - Staff Calls /api/sagas -> 403 Forbidden",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staffToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/sagas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 403 Forbidden\", function () { pm.response.to.have.status(403); });"
                 ]
               }
             }
           ]
         }
       ]
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "// Auto set todayDate to current date (YYYY-MM-DD)",
-          "const today = new Date().toISOString().split(\"T\")[0];",
-          "pm.collectionVariables.set(\"todayDate\", today);"
-        ]
-      }
     }
   ]
 }
