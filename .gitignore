@@ -9,3 +9,10 @@
 target/
 /volume-data/
 /mysql/
+
+# Slot 18 local docs and reports
+Slot18/*.docx
+Slot18/Assignment2/*.docx
+Slot18/Assignment_Readme.md
+Slot18/Assignment_Solution.md
+Slot18/generate_report.py
