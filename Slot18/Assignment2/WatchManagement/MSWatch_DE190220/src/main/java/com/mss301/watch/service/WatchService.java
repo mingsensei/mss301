@@ -36,6 +36,10 @@ public class WatchService {
             .map(this::toResponse).toList();
     }
 
+    public WatchResponse findById(Integer id) {
+        return loadResponse(id);
+    }
+
     public SagaResult<WatchResponse> create(WatchRequest request, Integer failAfterStep) {
         validate(request);
         SagaOutcome outcome = sagaOrchestrator.createWatch(WatchData.from(request, null), failAfterStep);

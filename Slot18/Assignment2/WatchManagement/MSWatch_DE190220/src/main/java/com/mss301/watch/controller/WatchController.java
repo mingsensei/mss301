@@ -36,6 +36,12 @@ public class WatchController {
         return ResponseEntity.ok(ApiResponse.success(watchService.findAll(), "Success"));
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get watch detail by ID")
+    public ResponseEntity<ApiResponse<WatchResponse>> findById(@PathVariable Integer id) {
+        return ResponseEntity.ok(ApiResponse.success(watchService.findById(id), "Success"));
+    }
+
     @PostMapping
     @Operation(summary = "Add a new watch (Admin only) - runs CREATE_WATCH saga")
     public ResponseEntity<ApiResponse<WatchResponse>> create(
