@@ -49,10 +49,10 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             })
             .build();
 
-        // (2) Public: login/refresh và CHỈ "GET /api/watches" (đề bài: list không cần quyền).
-        //     KHÔNG dùng startsWith("/api/watches"): như vậy POST/PUT/DELETE cũng thành public.
+        // (2) Public: login/refresh và GET /api/watches/** (catalog công khai).
+        //     Chỉ áp dụng với GET; POST/PUT/DELETE vẫn bắt buộc có JWT.
         boolean isPublic = PUBLIC_PREFIXES.stream().anyMatch(path::startsWith)
-            || (HttpMethod.GET.equals(request.getMethod()) && path.equals("/api/watches"));
+            || (HttpMethod.GET.equals(request.getMethod()) && path.startsWith("/api/watches"));
         if (isPublic) {
             return chain.filter(exchange.mutate().request(sanitized).build());
         }
