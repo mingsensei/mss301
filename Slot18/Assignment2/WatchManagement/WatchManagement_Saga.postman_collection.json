@@ -12,17 +12,17 @@
     },
     {
       "key": "accountUrl",
-      "value": "http://localhost:8081",
+      "value": "http://localhost:8080",
       "type": "string"
     },
     {
       "key": "brandUrl",
-      "value": "http://localhost:8082",
+      "value": "http://localhost:8080",
       "type": "string"
     },
     {
       "key": "watchUrl",
-      "value": "http://localhost:8083",
+      "value": "http://localhost:8080",
       "type": "string"
     },
     {
@@ -82,7 +82,7 @@
     },
     {
       "key": "todayDate",
-      "value": "2026-11-05",
+      "value": "2026-11-06",
       "type": "string"
     }
   ],
@@ -102,7 +102,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/login"
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -145,7 +153,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/login"
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -192,7 +208,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -228,7 +251,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/login"
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -264,7 +295,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/auth/refresh"
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -307,7 +346,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -348,7 +394,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -394,7 +447,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -440,7 +500,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -481,7 +548,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -522,7 +596,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -563,7 +644,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -598,7 +686,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             }
           },
           "event": [
@@ -621,7 +716,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{brandUrl}}/api/brands/1/watches"
+              "raw": "{{brandUrl}}/api/brands/1/watches",
+              "host": [
+                "{{brandUrl}}"
+              ],
+              "path": [
+                "api",
+                "brands",
+                "1",
+                "watches"
+              ]
             }
           },
           "event": [
@@ -655,7 +759,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -693,7 +804,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             }
           },
           "event": [
@@ -719,7 +837,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{brandUrl}}/api/brands/1/watches"
+              "raw": "{{brandUrl}}/api/brands/1/watches",
+              "host": [
+                "{{brandUrl}}"
+              ],
+              "path": [
+                "api",
+                "brands",
+                "1",
+                "watches"
+              ]
             }
           },
           "event": [
@@ -748,7 +875,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaA_Id}}"
+              "raw": "{{baseUrl}}/api/sagas/{{sagaA_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaA_Id}}"
+              ]
             }
           },
           "event": [
@@ -794,7 +929,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -835,7 +977,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaB_Id}}"
+              "raw": "{{baseUrl}}/api/sagas/{{sagaB_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaB_Id}}"
+              ]
             }
           },
           "event": [
@@ -885,7 +1035,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches"
+              "raw": "{{baseUrl}}/api/watches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -920,7 +1077,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{brandUrl}}/api/brands/1/watches"
+              "raw": "{{brandUrl}}/api/brands/1/watches",
+              "host": [
+                "{{brandUrl}}"
+              ],
+              "path": [
+                "api",
+                "brands",
+                "1",
+                "watches"
+              ]
             }
           },
           "event": [
@@ -949,7 +1115,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaC_Id}}"
+              "raw": "{{baseUrl}}/api/sagas/{{sagaC_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaC_Id}}"
+              ]
             }
           },
           "event": [
@@ -994,7 +1168,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}"
+              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "{{newWatchId}}"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -1026,7 +1208,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{brandUrl}}/api/brands/2/watches"
+              "raw": "{{brandUrl}}/api/brands/2/watches",
+              "host": [
+                "{{brandUrl}}"
+              ],
+              "path": [
+                "api",
+                "brands",
+                "2",
+                "watches"
+              ]
             }
           },
           "event": [
@@ -1060,7 +1251,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}"
+              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "{{newWatchId}}"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -1101,7 +1300,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaD_Id}}"
+              "raw": "{{baseUrl}}/api/sagas/{{sagaD_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaD_Id}}"
+              ]
             }
           },
           "event": [
@@ -1144,7 +1351,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}"
+              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "{{newWatchId}}"
+              ]
             },
             "body": {
               "mode": "raw",
@@ -1185,7 +1400,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaE_Id}}"
+              "raw": "{{baseUrl}}/api/sagas/{{sagaE_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaE_Id}}"
+              ]
             }
           },
           "event": [
@@ -1229,7 +1452,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}"
+              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "{{newWatchId}}"
+              ]
             }
           },
           "event": [
@@ -1261,7 +1492,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaF_Id}}"
+              "raw": "{{baseUrl}}/api/sagas/{{sagaF_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaF_Id}}"
+              ]
             }
           },
           "event": [
@@ -1299,7 +1538,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}"
+              "raw": "{{baseUrl}}/api/watches/{{newWatchId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "watches",
+                "{{newWatchId}}"
+              ]
             }
           },
           "event": [
@@ -1331,7 +1578,15 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas/{{sagaG_Id}}"
+              "raw": "{{baseUrl}}/api/sagas/{{sagaG_Id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas",
+                "{{sagaG_Id}}"
+              ]
             }
           },
           "event": [
@@ -1358,7 +1613,16 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{brandUrl}}/api/brands/2/watches"
+              "raw": "{{brandUrl}}/api/brands/2/watches",
+              "host": [
+                "{{brandUrl}}"
+              ],
+              "path": [
+                "api",
+                "brands",
+                "2",
+                "watches"
+              ]
             }
           },
           "event": [
@@ -1392,7 +1656,14 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas"
+              "raw": "{{baseUrl}}/api/sagas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas"
+              ]
             }
           },
           "event": [
@@ -1419,7 +1690,20 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/sagas?limit=10"
+              "raw": "{{baseUrl}}/api/sagas?limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sagas"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
             }
           },
           "event": [
@@ -1439,6 +1723,19 @@
           ]
         }
       ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto set todayDate to current date (YYYY-MM-DD)",
+          "const today = new Date().toISOString().split(\"T\")[0];",
+          "pm.collectionVariables.set(\"todayDate\", today);"
+        ]
+      }
     }
   ]
 }
